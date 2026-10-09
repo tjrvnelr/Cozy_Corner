@@ -28,6 +28,11 @@
   --shadow: 0 18px 55px rgba(43, 38, 27, 0.11);
   --shadow-card: 0 8px 24px rgba(43, 38, 27, 0.06);
   --radius: 20px;
+  color-scheme: light;
+}
+
+html {
+  background: var(--paper);
 }
 * {
   box-sizing: border-box;
@@ -40,6 +45,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  color: var(--ink);
+  background: var(--paper);
 }
 body,
 button,
@@ -221,6 +228,31 @@ button:disabled {
   gap: 6px;
 }
 .icon-action svg {
+  display: block;
+}
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    color 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
+}
+.theme-toggle:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: rotate(8deg);
+}
+.theme-toggle svg {
   display: block;
 }
 .action-label {
@@ -1453,6 +1485,172 @@ button:disabled {
   color: var(--accent-dark);
   margin: 11px 0 0;
 }
+.payment-backdrop {
+  z-index: 75;
+  padding: 18px;
+}
+.payment-modal {
+  position: relative;
+  width: min(590px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  background: var(--paper);
+  border-radius: 24px;
+  padding: 34px 36px 30px;
+  box-shadow: var(--shadow);
+  animation: modal-in 0.24s cubic-bezier(0.2, 0.65, 0.25, 1);
+  outline: none;
+}
+.payment-modal > .modal-close {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+}
+.payment-modal h2 {
+  font-family: var(--serif);
+  font-size: 37px;
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+.payment-intro {
+  color: var(--muted);
+  font-size: 10px;
+  margin: 10px 0 22px;
+}
+.payment-intro strong {
+  color: #4b4941;
+}
+.payment-method-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.payment-method-option {
+  min-height: 70px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 11px 10px 10px 29px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background: #fff;
+}
+.payment-method-option.selected {
+  border-color: var(--accent);
+  background: #fffaf7;
+  box-shadow: 0 0 0 1px rgba(201, 95, 59, 0.1);
+}
+.payment-method-option input {
+  position: absolute;
+  left: 10px;
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+.payment-method-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.payment-method-copy strong {
+  font-size: 10px;
+}
+.payment-method-copy small {
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.35;
+}
+.digital-payment-panel,
+.cashier-payment-note {
+  margin-top: 17px;
+  border-radius: 13px;
+  background: #f1efe8;
+  padding: 15px;
+}
+.digital-payment-panel {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+}
+.payment-qr-wrap {
+  width: 135px;
+  flex: none;
+  text-align: center;
+}
+.payment-qr-wrap img {
+  display: block;
+  width: 116px;
+  height: 116px;
+  object-fit: contain;
+  margin: 0 auto 6px;
+  mix-blend-mode: multiply;
+}
+.payment-qr-wrap span {
+  color: var(--muted);
+  display: block;
+  font-size: 8px;
+  line-height: 1.3;
+}
+.digital-payment-copy {
+  min-width: 0;
+}
+.digital-payment-copy h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+.digital-payment-copy p {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.55;
+  margin: 0 0 12px;
+}
+.payment-link-button {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: 9px;
+  display: inline-flex;
+}
+.cashier-payment-note {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.cashier-payment-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  flex: none;
+}
+.cashier-payment-note strong {
+  display: block;
+  font-size: 12px;
+}
+.cashier-payment-note p {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+  margin: 4px 0 0;
+}
+.payment-disclaimer {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+  margin: 15px 0 10px;
+}
+.payment-complete-button {
+  width: 100%;
+  min-height: 45px;
+  justify-content: space-between;
+}
 .confirmation-backdrop {
   z-index: 80;
 }
@@ -1507,6 +1705,20 @@ button:disabled {
 }
 .confirmation-number span {
   margin: 0 5px;
+}
+.confirmation-payment {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+  margin-bottom: 1px;
+  color: var(--muted);
+  font-size: 9px;
+  text-align: left;
+}
+.confirmation-payment strong {
+  color: #44423b;
 }
 .confirmation-items {
   text-align: left;
@@ -2093,6 +2305,40 @@ button:disabled {
   .confirmation-modal h2 {
     font-size: 34px;
   }
+  .payment-modal {
+    padding: 29px 20px 22px;
+    border-radius: 20px;
+  }
+  .payment-modal h2 {
+    font-size: 32px;
+  }
+  .payment-method-options {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .payment-method-option {
+    min-height: 54px;
+    padding-block: 8px;
+  }
+  .digital-payment-panel {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+  .payment-qr-wrap {
+    width: 105px;
+  }
+  .payment-qr-wrap img {
+    width: 94px;
+    height: 94px;
+  }
+  .digital-payment-copy p {
+    font-size: 8px;
+  }
+  .payment-link-button {
+    font-size: 8px;
+    padding-inline: 8px;
+  }
   .mobile-cart-pill {
     position: fixed;
     z-index: 30;
@@ -2215,5 +2461,298 @@ button:disabled {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark theme: keep the warm Cozy Corner palette while giving every surface
+   enough contrast for comfortable reading at night. */
+[data-theme="dark"] {
+  --paper: #171614;
+  --white: #24221f;
+  --ink: #f2eee8;
+  --muted: #aaa49a;
+  --soft: #bcb5aa;
+  --line: #393632;
+  --line-dark: #4d4942;
+  --accent: #d87552;
+  --accent-dark: #f0a080;
+  --accent-soft: #3b2520;
+  --olive: #9aaa7a;
+  --shadow: 0 18px 55px rgba(0, 0, 0, 0.38);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.26);
+  color-scheme: dark;
+}
+
+[data-theme="dark"] .site-header {
+  background: rgba(23, 22, 20, 0.94);
+  border-bottom-color: rgba(57, 54, 50, 0.88);
+}
+[data-theme="dark"] .nav-links a,
+[data-theme="dark"] .button-text,
+[data-theme="dark"] .section-description,
+[data-theme="dark"] .menu-count,
+[data-theme="dark"] .hero-description,
+[data-theme="dark"] .hero-note,
+[data-theme="dark"] .food-category-label,
+[data-theme="dark"] .food-description,
+[data-theme="dark"] .modal-description,
+[data-theme="dark"] .cart-list-caption,
+[data-theme="dark"] .cart-item-option,
+[data-theme="dark"] .cart-unit-price,
+[data-theme="dark"] .checkout-note,
+[data-theme="dark"] .drawer-footnote,
+[data-theme="dark"] .empty-cart p,
+[data-theme="dark"] .confirmation-number,
+[data-theme="dark"] .confirmation-demo-note {
+  color: var(--muted);
+}
+[data-theme="dark"] .nav-search,
+[data-theme="dark"] .menu-search,
+[data-theme="dark"] .details-button,
+[data-theme="dark"] .modal-close,
+[data-theme="dark"] .option-field select,
+[data-theme="dark"] .delivery-option,
+[data-theme="dark"] .payment-method-option,
+[data-theme="dark"] .favorite-button,
+[data-theme="dark"] .empty-menu {
+  background: var(--white);
+}
+[data-theme="dark"] .nav-search input,
+[data-theme="dark"] .menu-search input,
+[data-theme="dark"] .option-field select,
+[data-theme="dark"] .sort-select-wrap select {
+  color: var(--ink);
+}
+[data-theme="dark"] .nav-search input::placeholder,
+[data-theme="dark"] .menu-search input::placeholder {
+  color: var(--muted);
+}
+[data-theme="dark"] .search-jump,
+[data-theme="dark"] .clear-search,
+[data-theme="dark"] .add-button,
+[data-theme="dark"] .ingredient-list span,
+[data-theme="dark"] .drawer-count,
+[data-theme="dark"] .empty-cart-icon,
+[data-theme="dark"] .digital-payment-panel,
+[data-theme="dark"] .cashier-payment-note,
+[data-theme="dark"] .eta-box,
+[data-theme="dark"] .order-prompt {
+  background: #2b2925;
+}
+[data-theme="dark"] .search-jump,
+[data-theme="dark"] .clear-search,
+[data-theme="dark"] .add-button,
+[data-theme="dark"] .ingredient-list span,
+[data-theme="dark"] .drawer-count,
+[data-theme="dark"] .empty-cart-icon,
+[data-theme="dark"] .eta-box {
+  color: var(--muted);
+}
+[data-theme="dark"] .hero h1,
+[data-theme="dark"] .section-heading-row h2,
+[data-theme="dark"] .menu-heading h2,
+[data-theme="dark"] .order-prompt h2,
+[data-theme="dark"] .confirmation-modal h2 {
+  color: var(--ink);
+}
+[data-theme="dark"] .hero-visual,
+[data-theme="dark"] .food-card-image-wrap,
+[data-theme="dark"] .food-modal-image-wrap,
+[data-theme="dark"] .cart-item > img {
+  background: #302b25;
+}
+[data-theme="dark"] .hero-image-caption,
+[data-theme="dark"] .popular-tag {
+  background: rgba(36, 34, 31, 0.92);
+  color: var(--soft);
+}
+[data-theme="dark"] .caption-separator {
+  color: #777168;
+}
+[data-theme="dark"] .button-dark,
+[data-theme="dark"] .category-chip.selected,
+[data-theme="dark"] .mobile-cart-pill,
+[data-theme="dark"] .toast {
+  background: #eee9e0;
+  color: #1b1917;
+}
+[data-theme="dark"] .button-dark:hover {
+  background: #fffaf2;
+}
+[data-theme="dark"] .food-card {
+  border-color: #3b3833;
+}
+[data-theme="dark"] .food-card:hover {
+  border-color: #575149;
+}
+[data-theme="dark"] .favorite-button {
+  color: var(--soft);
+}
+[data-theme="dark"] .favorite-button.is-favorite {
+  background: #432821;
+}
+[data-theme="dark"] .unavailable-tag {
+  background: #514941;
+}
+[data-theme="dark"] .availability-available {
+  color: #adc28b;
+}
+[data-theme="dark"] .availability-dot {
+  background: #adc28b;
+}
+[data-theme="dark"] .add-button {
+  color: var(--ink);
+}
+[data-theme="dark"] .details-button {
+  color: var(--soft);
+}
+[data-theme="dark"] .category-chip {
+  color: var(--muted);
+  border-color: #48443e;
+}
+[data-theme="dark"] .category-chip:hover {
+  border-color: #70685d;
+  color: var(--ink);
+}
+[data-theme="dark"] .category-chip.selected .category-all-mark {
+  color: #f5ae8e;
+}
+[data-theme="dark"] .sort-select-wrap,
+[data-theme="dark"] .sort-select-wrap select {
+  color: var(--muted);
+}
+[data-theme="dark"] .sort-select-wrap select {
+  background-color: var(--white);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='m1 1 4.5 4.5L10 1' fill='none' stroke='%23aaa49a' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+[data-theme="dark"] .favorites-filter-chip {
+  border-color: #754335;
+  background: #39231e;
+  color: var(--accent-dark);
+}
+[data-theme="dark"] .empty-menu {
+  border-color: #504b43;
+}
+[data-theme="dark"] .order-prompt-mark {
+  color: var(--muted);
+  border-right-color: #4a463f;
+}
+[data-theme="dark"] .order-prompt p:last-child {
+  color: var(--muted);
+}
+[data-theme="dark"] .site-footer {
+  background: #201e1b;
+}
+[data-theme="dark"] .footer-note,
+[data-theme="dark"] .footer-links button,
+[data-theme="dark"] .footer-links a,
+[data-theme="dark"] .footer-bottom,
+[data-theme="dark"] .footer-note span {
+  color: var(--muted);
+}
+[data-theme="dark"] .footer-bottom {
+  border-top-color: var(--line);
+}
+[data-theme="dark"] .drawer-backdrop,
+[data-theme="dark"] .modal-backdrop {
+  background: rgba(0, 0, 0, 0.64);
+}
+[data-theme="dark"] .cart-drawer,
+[data-theme="dark"] .food-modal,
+[data-theme="dark"] .payment-modal,
+[data-theme="dark"] .confirmation-modal {
+  background: var(--paper);
+}
+[data-theme="dark"] .drawer-count {
+  color: var(--muted);
+}
+[data-theme="dark"] .modal-close {
+  color: var(--soft);
+}
+[data-theme="dark"] .cart-item-title-row strong,
+[data-theme="dark"] .summary-lines strong,
+[data-theme="dark"] .confirmation-number strong,
+[data-theme="dark"] .confirmation-payment strong,
+[data-theme="dark"] .confirmation-items strong,
+[data-theme="dark"] .eta-box strong,
+[data-theme="dark"] .payment-intro strong {
+  color: var(--ink);
+}
+[data-theme="dark"] .quantity-stepper {
+  background: var(--white);
+}
+[data-theme="dark"] .quantity-stepper button {
+  color: var(--soft);
+}
+[data-theme="dark"] .quantity-stepper button:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+[data-theme="dark"] .quantity-stepper output {
+  color: var(--ink);
+}
+[data-theme="dark"] .delivery-option.selected,
+[data-theme="dark"] .payment-method-option.selected {
+  background: #39231e;
+}
+[data-theme="dark"] .summary-lines .summary-total {
+  color: var(--ink);
+}
+[data-theme="dark"] .empty-cart-icon {
+  color: #b2a595;
+}
+[data-theme="dark"] .ingredient-list span {
+  color: var(--soft);
+}
+[data-theme="dark"] .modal-popular {
+  color: var(--muted);
+}
+[data-theme="dark"] .payment-qr-wrap img {
+  background: #fff;
+  mix-blend-mode: normal;
+}
+[data-theme="dark"] .confirmation-seal {
+  background: #34402e;
+  color: #c0d89d;
+}
+[data-theme="dark"] .confirmation-modal h2 {
+  color: var(--ink);
+}
+[data-theme="dark"] .eta-box strong {
+  color: var(--ink);
+}
+[data-theme="dark"] .toast-favorite {
+  background: #2f2722;
+  color: var(--ink);
+  border-color: #584138;
+}
+[data-theme="dark"] .toast-favorite .toast-check {
+  background: #4a2b22;
+}
+[data-theme="dark"] .toast-error {
+  background: #8f3e31;
+  color: #fff8f2;
+}
+[data-theme="dark"] .mobile-cart-count {
+  background: #2a2723;
+  color: #f2eee8;
+}
+
+@media (max-width: 760px) {
+  [data-theme="dark"] .nav-search:focus-within {
+    background: var(--white);
+  }
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+  }
+  .theme-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+@media (max-width: 390px) {
+  .theme-toggle {
+    width: 32px;
+    height: 32px;
   }
 }

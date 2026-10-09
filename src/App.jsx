@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Navbar from "./components/Navbar.jsx";
 import Hero from "./components/Hero.jsx";
 import FeaturedSection from "./components/FeaturedSection.jsx";
@@ -7,6 +14,7 @@ import SearchSortBar from "./components/SearchSortBar.jsx";
 import FoodGrid from "./components/FoodGrid.jsx";
 import FoodModal from "./components/FoodModal.jsx";
 import CartDrawer from "./components/CartDrawer.jsx";
+import PaymentMethod from "./components/PaymentMethod.jsx";
 import ConfirmationModal from "./components/ConfirmationModal.jsx";
 import Toast from "./components/Toast.jsx";
 import Footer from "./components/Footer.jsx";
@@ -33,8 +41,10 @@ export default function App() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [deliveryMode, setDeliveryMode] = useState("pickup");
+  const [paymentOrder, setPaymentOrder] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
   const [toast, setToast] = useState(null);
+  const [theme, setTheme] = usePersistentState("foodmenu.theme.v1", "light");
   const searchRef = useRef(null);
   const toastTimer = useRef(null);
   const closeCart = useCallback(() => setCartOpen(false), []);
@@ -42,6 +52,12 @@ export default function App() {
   const closeConfirmation = useCallback(() => setConfirmation(null), []);
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  useLayoutEffect(() => {
+    const nextTheme = theme === "dark" ? "dark" : "light";
+    document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.style.colorScheme = nextTheme;
+  }, [theme]);
 
   const showToast = (message, kind = "success") => {
     window.clearTimeout(toastTimer.current);
@@ -167,9 +183,19 @@ export default function App() {
       mode: deliveryMode,
       eta: deliveryMode === "delivery" ? "35–45 minutes" : "20–30 minutes",
     };
-    setConfirmation(order);
-    setCart([]);
+    setPaymentOrder(order);
     setCartOpen(false);
+  };
+
+  const completePayment = ({ method, status }) => {
+    if (!paymentOrder) return;
+    setConfirmation({
+      ...paymentOrder,
+      paymentMethod: method,
+      paymentStatus: status,
+    });
+    setPaymentOrder(null);
+    setCart([]);
   };
 
   const scrollTo = (id) =>
@@ -191,6 +217,10 @@ export default function App() {
         cartCount={cartCount}
         onOpenCart={() => setCartOpen(true)}
         onFocusSearch={() => searchRef.current?.focus()}
+        theme={theme}
+        onToggleTheme={() =>
+          setTheme((current) => (current === "dark" ? "light" : "dark"))
+        }
       />
       <main>
         <Hero
@@ -297,6 +327,16 @@ export default function App() {
         onUpdateQuantity={updateQuantity}
         onPlaceOrder={placeOrder}
       />
+      {paymentOrder && (
+        <PaymentMethod
+          order={paymentOrder}
+          onCancel={() => {
+            setPaymentOrder(null);
+            setCartOpen(true);
+          }}
+          onPaid={completePayment}
+        />
+      )}
       {selectedItem && (
         <FoodModal
           key={selectedItem.id}

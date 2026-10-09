@@ -1,4 +1,10 @@
-import { BagIcon, HeartIcon, SearchIcon } from "./Icons.jsx";
+import {
+  BagIcon,
+  HeartIcon,
+  MoonIcon,
+  SearchIcon,
+  SunIcon,
+} from "./Icons.jsx";
 
 export default function Navbar({
   query,
@@ -9,6 +15,8 @@ export default function Navbar({
   cartCount,
   onOpenCart,
   onFocusSearch,
+  theme,
+  onToggleTheme,
 }) {
   return (
     <header className="site-header" id="top">
@@ -47,24 +55,6 @@ export default function Navbar({
           <a href="#featured">Popular</a>
         </nav>
         <div className="header-actions">
-          <label className="nav-search">
-            <SearchIcon size={17} />
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-              placeholder="Find something good"
-              aria-label="Search menu by name, category, or description"
-            />
-            <button
-              className="search-jump"
-              type="button"
-              onClick={onFocusSearch}
-              aria-label="Jump to menu search"
-            >
-              ↵
-            </button>
-          </label>
           <button
             className={`icon-action favorite-nav ${favoritesOnly ? "active" : ""}`}
             type="button"
@@ -91,6 +81,16 @@ export default function Navbar({
               <span className="action-label">Cart</span>
               <span className="cart-badge">{cartCount}</span>
             </span>
+          </button>
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={onToggleTheme}
+            aria-pressed={theme === "dark"}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+          >
+            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
           </button>
         </div>
       </div>

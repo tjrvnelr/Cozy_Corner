@@ -79,6 +79,16 @@ export default function ConfirmationModal({ order, onClose, onBack }) {
           Order <strong>#{order.number}</strong> <span>·</span>{" "}
           {order.mode === "delivery" ? "Delivery" : "Pickup"}
         </p>
+        <div className="confirmation-payment">
+          <span>Payment</span>
+          <strong>
+            {order.paymentMethod === "cashier"
+              ? "Pay at cashier"
+              : order.paymentMethod === "maya"
+                ? "Maya"
+                : "GCash"}
+          </strong>
+        </div>
         <div className="confirmation-items">
           {order.items.map((item) => (
             <div key={item.lineId}>
