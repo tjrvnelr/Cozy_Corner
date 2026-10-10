@@ -2,7 +2,6 @@ import {
   BagIcon,
   HeartIcon,
   MoonIcon,
-  SearchIcon,
   SunIcon,
 } from "./Icons.jsx";
 

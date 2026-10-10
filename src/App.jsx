@@ -18,6 +18,7 @@ import PaymentMethod from "./components/PaymentMethod.jsx";
 import ConfirmationModal from "./components/ConfirmationModal.jsx";
 import Toast from "./components/Toast.jsx";
 import Footer from "./components/Footer.jsx";
+import LoadingScreen from "./components/LoadingScreen.jsx";
 import {
   categories,
   formatPrice,
@@ -45,6 +46,7 @@ export default function App() {
   const [confirmation, setConfirmation] = useState(null);
   const [toast, setToast] = useState(null);
   const [theme, setTheme] = usePersistentState("foodmenu.theme.v1", "light");
+  const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef(null);
   const toastTimer = useRef(null);
   const closeCart = useCallback(() => setCartOpen(false), []);
@@ -52,6 +54,11 @@ export default function App() {
   const closeConfirmation = useCallback(() => setConfirmation(null), []);
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsLoading(false), 1100);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useLayoutEffect(() => {
     const nextTheme = theme === "dark" ? "dark" : "light";
@@ -205,6 +212,7 @@ export default function App() {
 
   return (
     <div className="app-shell" id="top">
+      {isLoading && <LoadingScreen />}
       <Navbar
         query={query}
         onQueryChange={setQuery}

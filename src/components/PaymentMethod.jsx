@@ -158,18 +158,8 @@ export default function PaymentMethod({ order, onCancel, onPaid }) {
             <div className="digital-payment-copy">
               <h3>Pay with {selected.label}</h3>
               <p>
-                Scan the QR code with your {selected.label} app, or open the
-                direct payment link below.
+                Scan the QR code with your {selected.label} app
               </p>
-              <a
-                className="button button-outline payment-link-button"
-                href={selected.paymentLink}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open {selected.label} payment{" "}
-                <span aria-hidden="true">↗</span>
-              </a>
             </div>
           </div>
         )}
