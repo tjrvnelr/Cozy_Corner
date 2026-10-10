@@ -1,6 +1,6 @@
 import { LeafMark } from "./Icons.jsx";
 
-export default function Footer({ onMenu, onPopular }) {
+export default function Footer({ onMenu, onPopular, onFeedback }) {
   return (
     <footer className="site-footer">
       <div className="footer-top section-wrap">
@@ -17,12 +17,16 @@ export default function Footer({ onMenu, onPopular }) {
             <span className="brand-caption">Little Corner of Comfort</span>
           </span>
         </a>
-        <p className="footer-note">
-          Good things are best shared.
-          <br />
-          <span>Made with care, served with quality.</span>
-        </p>
         <nav className="footer-links" aria-label="Footer navigation">
+          <button type="button" onClick={onFeedback}>
+            Give Reviews
+          </button>
+          <button
+            type="button"
+            onClick={() => window.open("https://cozy-corner.productbridge.io/feedback", "_blank")}
+          >
+            Customer feedback
+          </button>
           <button type="button" onClick={onMenu}>
             Our menu
           </button>

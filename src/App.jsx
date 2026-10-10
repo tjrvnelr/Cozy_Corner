@@ -19,6 +19,7 @@ import ConfirmationModal from "./components/ConfirmationModal.jsx";
 import Toast from "./components/Toast.jsx";
 import Footer from "./components/Footer.jsx";
 import LoadingScreen from "./components/LoadingScreen.jsx";
+import FeedbackModal from "./components/ReviewsModal.jsx";
 import {
   categories,
   formatPrice,
@@ -44,6 +45,7 @@ export default function App() {
   const [deliveryMode, setDeliveryMode] = useState("pickup");
   const [paymentOrder, setPaymentOrder] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [theme, setTheme] = usePersistentState("foodmenu.theme.v1", "light");
   const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +54,7 @@ export default function App() {
   const closeCart = useCallback(() => setCartOpen(false), []);
   const closeDetails = useCallback(() => setSelectedItem(null), []);
   const closeConfirmation = useCallback(() => setConfirmation(null), []);
+  const closeFeedback = useCallback(() => setFeedbackOpen(false), []);
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
@@ -293,30 +296,11 @@ export default function App() {
             }}
           />
         </section>
-        <section
-          className="order-prompt section-wrap"
-          aria-label="Ordering information"
-        >
-          <div className="order-prompt-mark" aria-hidden="true">
-            01
-          </div>
-          <div>
-            <p className="eyebrow">Easy does it</p>
-            <h2>Make it a good meal.</h2>
-            <p>Pick a favorite, make it yours, and we’ll take it from here.</p>
-          </div>
-          <button
-            className="button button-dark"
-            type="button"
-            onClick={() => setCartOpen(true)}
-          >
-            Review your order <span aria-hidden="true">↗</span>
-          </button>
-        </section>
       </main>
       <Footer
         onMenu={() => scrollTo("menu")}
         onPopular={() => scrollTo("featured")}
+        onFeedback={() => setFeedbackOpen(true)}
       />
       <CartDrawer
         open={cartOpen}
@@ -362,6 +346,15 @@ export default function App() {
           onBack={() => {
             setConfirmation(null);
             scrollTo("menu");
+          }}
+        />
+      )}
+      {feedbackOpen && (
+        <FeedbackModal
+          onClose={closeFeedback}
+          onSubmit={() => {
+            setFeedbackOpen(false);
+            showToast("Thanks for sharing your feedback!");
           }}
         />
       )}
