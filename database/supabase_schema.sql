@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 CREATE INDEX IF NOT EXISTS order_items_order_id_idx ON order_items (order_id);
+CREATE INDEX IF NOT EXISTS order_items_menu_item_id_idx ON order_items (menu_item_id);
 
 -- Payments table
 CREATE TABLE IF NOT EXISTS payments (
@@ -74,7 +75,9 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 -- Customer Order Summary View
-CREATE OR REPLACE VIEW customer_order_summary AS
+CREATE OR REPLACE VIEW customer_order_summary
+WITH (security_invoker = true)
+AS
 SELECT
   o.id AS order_id,
   o.order_number,
@@ -103,6 +106,48 @@ CREATE POLICY "Anyone can read available menu items"
   TO anon, authenticated
   USING (true);
 
+-- Checkout is intentionally insert-only. These policies let the public RPC
+-- run as its caller without granting it the privileges of the table owner.
+DROP POLICY IF EXISTS "Visitors can create customers" ON customers;
+CREATE POLICY "Visitors can create customers"
+  ON customers
+  FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (CHAR_LENGTH(TRIM(name)) BETWEEN 2 AND 120);
+
+DROP POLICY IF EXISTS "Visitors can create orders" ON orders;
+CREATE POLICY "Visitors can create orders"
+  ON orders
+  FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (
+    fulfillment_method IN ('pickup', 'delivery')
+    AND subtotal >= 0
+    AND delivery_fee >= 0
+    AND total >= 0
+  );
+
+DROP POLICY IF EXISTS "Visitors can create order items" ON order_items;
+CREATE POLICY "Visitors can create order items"
+  ON order_items
+  FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (
+    quantity > 0
+    AND unit_price >= 0
+    AND line_total >= 0
+  );
+
+DROP POLICY IF EXISTS "Visitors can create payments" ON payments;
+CREATE POLICY "Visitors can create payments"
+  ON payments
+  FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (
+    method IN ('gcash', 'maya', 'cashier')
+    AND status IN ('paid', 'pay_at_cashier', 'failed', 'refunded')
+  );
+
 CREATE OR REPLACE FUNCTION public.create_order(
   p_customer_name TEXT,
   p_order_number TEXT,
@@ -116,7 +161,7 @@ CREATE OR REPLACE FUNCTION public.create_order(
 )
 RETURNS JSONB
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public, pg_temp
 AS $$
 DECLARE
@@ -133,8 +178,10 @@ BEGIN
   END IF;
 
   INSERT INTO customers (name)
-  VALUES (TRIM(p_customer_name))
-  RETURNING id INTO v_customer_id;
+  VALUES (TRIM(p_customer_name));
+
+  SELECT currval('public.customers_id_seq'::regclass)
+  INTO v_customer_id;
 
   INSERT INTO orders (
     order_number,
@@ -151,8 +198,10 @@ BEGIN
     p_subtotal,
     p_delivery_fee,
     p_total
-  )
-  RETURNING id INTO v_order_id;
+  );
+
+  SELECT currval('public.orders_id_seq'::regclass)
+  INTO v_order_id;
 
   FOR v_item IN SELECT value FROM jsonb_array_elements(p_items)
   LOOP
@@ -193,3 +242,9 @@ $$;
 
 REVOKE ALL ON FUNCTION public.create_order(TEXT, TEXT, TEXT, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, JSONB) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.create_order(TEXT, TEXT, TEXT, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, JSONB) TO anon, authenticated;
+
+-- The invoker function needs the same insert privileges as the checkout
+-- policies. No UPDATE or DELETE privileges are granted here.
+GRANT INSERT ON customers, orders, order_items, payments TO anon, authenticated;
+GRANT USAGE, SELECT ON SEQUENCE customers_id_seq, orders_id_seq,
+  order_items_id_seq, payments_id_seq TO anon, authenticated;

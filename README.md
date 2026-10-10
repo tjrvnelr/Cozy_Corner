@@ -6,7 +6,8 @@ Cozy Corner is a warm, welcoming food ordering website where visitors can explor
 
 1. In the Supabase SQL Editor, run `database/supabase_schema.sql`.
 2. Run `database/seed_data.sql` to copy the menu from `src/data/menuData.js` into the `menu_items` table.
-3. In Vercel, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables, then redeploy.
+3. If the schema was already deployed, run `database/security_hardening.sql` in the Supabase SQL Editor.
+4. In Vercel, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables, then redeploy.
 
 The app reads the seeded menu from Supabase. If the table is empty or temporarily unavailable, it falls back to `menuData.js` so the menu remains visible. Completed checkout records are written through the `create_order` database function into `customers`, `orders`, `order_items`, and `payments`.
 
