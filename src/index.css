@@ -1714,6 +1714,35 @@ button:disabled {
 .payment-intro strong {
   color: #4b4941;
 }
+.customer-name-field {
+  display: block;
+  margin: 0 0 20px;
+}
+.customer-name-field span {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.customer-name-field input {
+  display: block;
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--white);
+  color: var(--ink);
+  padding: 0 12px;
+  font-size: 10px;
+}
+.customer-name-field input::placeholder {
+  color: var(--muted);
+}
+.customer-name-field input:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(201, 95, 59, 0.16);
+  outline-offset: 0;
+}
 .payment-method-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1897,6 +1926,14 @@ button:disabled {
 }
 .confirmation-number span {
   margin: 0 5px;
+}
+.confirmation-customer {
+  margin: -11px 0 19px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.confirmation-customer strong {
+  color: var(--ink);
 }
 .confirmation-payment {
   display: flex;

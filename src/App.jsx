@@ -76,6 +76,7 @@ export default function App() {
   };
 
   const toggleFavorite = (item) => {
+    if (!item || typeof item.id !== "string") return;
     const isSaved = favorites.includes(item.id);
     setFavorites((current) =>
       isSaved ? current.filter((id) => id !== item.id) : [...current, item.id],
@@ -89,6 +90,10 @@ export default function App() {
   };
 
   const addToCart = (item, quantity = 1, option) => {
+    if (!item || typeof item.id !== "string") {
+      showToast("This menu item is unavailable", "error");
+      return;
+    }
     if (!item.available) {
       showToast("This item is currently unavailable", "error");
       return;
@@ -192,15 +197,17 @@ export default function App() {
       total: subtotal + fee,
       mode: deliveryMode,
       eta: deliveryMode === "delivery" ? "35–45 minutes" : "20–30 minutes",
+      orderedAt: new Date().toISOString(),
     };
     setPaymentOrder(order);
     setCartOpen(false);
   };
 
-  const completePayment = ({ method, status }) => {
+  const completePayment = ({ customerName, method, status }) => {
     if (!paymentOrder) return;
     setConfirmation({
       ...paymentOrder,
+      customerName,
       paymentMethod: method,
       paymentStatus: status,
     });

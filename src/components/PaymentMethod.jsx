@@ -27,6 +27,7 @@ const paymentMethods = {
 export default function PaymentMethod({ order, onCancel, onPaid }) {
   const dialogRef = useRef(null);
   const [selectedMethod, setSelectedMethod] = useState("gcash");
+  const [customerName, setCustomerName] = useState("");
   const selected = paymentMethods[selectedMethod];
 
   useEffect(() => {
@@ -71,7 +72,10 @@ export default function PaymentMethod({ order, onCancel, onPaid }) {
   }, [onCancel]);
 
   const finishPayment = () => {
+    const trimmedName = customerName.trim();
+    if (!trimmedName) return;
     onPaid({
+      customerName: trimmedName,
       method: selectedMethod,
       status: selectedMethod === "cashier" ? "pay_at_cashier" : "paid",
     });
@@ -107,6 +111,21 @@ export default function PaymentMethod({ order, onCancel, onPaid }) {
           Order <strong>#{order.number}</strong> · Total{" "}
           <strong>{formatPrice(order.total)}</strong>
         </p>
+
+        <label className="customer-name-field" htmlFor="customer-name">
+          <span>Your name</span>
+          <input
+            id="customer-name"
+            name="customerName"
+            type="text"
+            value={customerName}
+            onChange={(event) => setCustomerName(event.target.value)}
+            placeholder="Enter your name"
+            autoComplete="name"
+            maxLength={120}
+            required
+          />
+        </label>
 
         <div
           className="payment-method-options"
@@ -173,6 +192,7 @@ export default function PaymentMethod({ order, onCancel, onPaid }) {
           className="button button-accent payment-complete-button"
           type="button"
           onClick={finishPayment}
+          disabled={!customerName.trim()}
         >
           {selectedMethod === "cashier"
             ? "Confirm cashier payment"

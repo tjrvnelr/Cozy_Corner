@@ -79,6 +79,9 @@ export default function ConfirmationModal({ order, onClose, onBack }) {
           Order <strong>#{order.number}</strong> <span>·</span>{" "}
           {order.mode === "delivery" ? "Delivery" : "Pickup"}
         </p>
+        <p className="confirmation-customer">
+          Prepared for <strong>{order.customerName}</strong>
+        </p>
         <div className="confirmation-payment">
           <span>Payment</span>
           <strong>
@@ -90,10 +93,12 @@ export default function ConfirmationModal({ order, onClose, onBack }) {
           </strong>
         </div>
         <div className="confirmation-items">
-          {order.items.map((item) => (
-            <div key={item.lineId}>
+          {(Array.isArray(order.items) ? order.items : [])
+            .filter((item) => item && typeof item === "object")
+            .map((item, index) => (
+            <div key={item.lineId || `${item.id || "item"}-${index}`}>
               <span>
-                {item.quantity} × {item.name}
+                {item.quantity} × {item.name || "Menu item"}
                 {item.option && item.option !== "Regular"
                   ? ` · ${item.option}`
                   : ""}
