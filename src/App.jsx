@@ -23,6 +23,7 @@ import FeedbackModal from "./components/ReviewsModal.jsx";
 import {
   categories,
   formatPrice,
+  menuData,
   priceForOption,
 } from "./data/menuData.js";
 import { usePersistentState } from "./hooks/usePersistentState.js";
@@ -31,7 +32,8 @@ import { supabase } from "./lib/supabase.js";
 const DELIVERY_FEE = 49;
 
 export default function App() {
-  const [menuItems, setMenuItems] = useState([]);
+  // Keep the bundled menu available while Supabase is empty or unavailable.
+  const [menuItems, setMenuItems] = useState(menuData);
   const [cart, setCart] = usePersistentState("foodmenu.cart.v1", []);
   const [favorites, setFavorites] = usePersistentState(
     "foodmenu.favorites.v1",
@@ -68,10 +70,11 @@ export default function App() {
           .order("name");
         
         if (error) throw error;
-        setMenuItems(data || []);
+        setMenuItems(Array.isArray(data) && data.length ? data : menuData);
       } catch (err) {
         console.error("Error fetching menu:", err);
-        showToast("Failed to load menu", "error");
+        setMenuItems(menuData);
+        showToast("Showing the saved menu while Supabase reconnects", "error");
       } finally {
         setIsLoading(false);
       }
@@ -219,8 +222,37 @@ export default function App() {
     setCartOpen(false);
   };
 
-  const completePayment = ({ customerName, method, status }) => {
+  const completePayment = async ({ customerName, method, status }) => {
     if (!paymentOrder) return;
+
+    const { error } = await supabase.rpc("create_order", {
+      p_customer_name: customerName,
+      p_order_number: paymentOrder.number,
+      p_fulfillment_method: paymentOrder.mode,
+      p_subtotal: paymentOrder.subtotal,
+      p_delivery_fee: paymentOrder.deliveryFee,
+      p_total: paymentOrder.total,
+      p_payment_method: method,
+      p_payment_status: status,
+      p_items: paymentOrder.items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        option: item.option,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        lineTotal: item.lineTotal,
+      })),
+    });
+
+    if (error) {
+      console.error("Error saving order:", error);
+      showToast(
+        "We could not save your order. Run the Supabase SQL setup, then try again.",
+        "error",
+      );
+      return;
+    }
+
     setConfirmation({
       ...paymentOrder,
       customerName,

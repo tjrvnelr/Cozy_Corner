@@ -87,3 +87,109 @@ SELECT
 FROM orders AS o
 JOIN customers AS c ON c.id = o.customer_id
 LEFT JOIN payments AS p ON p.order_id = o.id;
+
+-- Public visitors may read the menu, but orders are written through the
+-- transactional function below instead of granting direct table writes.
+ALTER TABLE menu_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can read available menu items" ON menu_items;
+CREATE POLICY "Anyone can read available menu items"
+  ON menu_items
+  FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+CREATE OR REPLACE FUNCTION public.create_order(
+  p_customer_name TEXT,
+  p_order_number TEXT,
+  p_fulfillment_method TEXT,
+  p_subtotal NUMERIC,
+  p_delivery_fee NUMERIC,
+  p_total NUMERIC,
+  p_payment_method TEXT,
+  p_payment_status TEXT,
+  p_items JSONB
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+  v_customer_id BIGINT;
+  v_order_id BIGINT;
+  v_item JSONB;
+BEGIN
+  IF CHAR_LENGTH(TRIM(p_customer_name)) NOT BETWEEN 2 AND 120 THEN
+    RAISE EXCEPTION 'Customer name must be between 2 and 120 characters';
+  END IF;
+
+  IF jsonb_typeof(p_items) <> 'array' OR jsonb_array_length(p_items) = 0 THEN
+    RAISE EXCEPTION 'An order must contain at least one item';
+  END IF;
+
+  INSERT INTO customers (name)
+  VALUES (TRIM(p_customer_name))
+  RETURNING id INTO v_customer_id;
+
+  INSERT INTO orders (
+    order_number,
+    customer_id,
+    fulfillment_method,
+    subtotal,
+    delivery_fee,
+    total
+  )
+  VALUES (
+    p_order_number,
+    v_customer_id,
+    p_fulfillment_method,
+    p_subtotal,
+    p_delivery_fee,
+    p_total
+  )
+  RETURNING id INTO v_order_id;
+
+  FOR v_item IN SELECT value FROM jsonb_array_elements(p_items)
+  LOOP
+    INSERT INTO order_items (
+      order_id,
+      menu_item_id,
+      item_name,
+      option_name,
+      quantity,
+      unit_price,
+      line_total
+    )
+    VALUES (
+      v_order_id,
+      v_item->>'id',
+      v_item->>'name',
+      NULLIF(v_item->>'option', ''),
+      (v_item->>'quantity')::INT,
+      (v_item->>'unitPrice')::NUMERIC,
+      (v_item->>'lineTotal')::NUMERIC
+    );
+  END LOOP;
+
+  INSERT INTO payments (order_id, method, status, paid_at)
+  VALUES (
+    v_order_id,
+    p_payment_method,
+    p_payment_status,
+    CASE WHEN p_payment_status = 'paid' THEN CURRENT_TIMESTAMP ELSE NULL END
+  );
+
+  RETURN jsonb_build_object(
+    'order_id', v_order_id,
+    'order_number', p_order_number
+  );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.create_order(TEXT, TEXT, TEXT, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, JSONB) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.create_order(TEXT, TEXT, TEXT, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, JSONB) TO anon, authenticated;

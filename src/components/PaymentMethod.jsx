@@ -28,6 +28,7 @@ export default function PaymentMethod({ order, onCancel, onPaid }) {
   const dialogRef = useRef(null);
   const [selectedMethod, setSelectedMethod] = useState("gcash");
   const [customerName, setCustomerName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const selected = paymentMethods[selectedMethod];
 
   useEffect(() => {
@@ -71,14 +72,19 @@ export default function PaymentMethod({ order, onCancel, onPaid }) {
     };
   }, [onCancel]);
 
-  const finishPayment = () => {
+  const finishPayment = async () => {
     const trimmedName = customerName.trim();
-    if (!trimmedName) return;
-    onPaid({
-      customerName: trimmedName,
-      method: selectedMethod,
-      status: selectedMethod === "cashier" ? "pay_at_cashier" : "paid",
-    });
+    if (!trimmedName || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onPaid({
+        customerName: trimmedName,
+        method: selectedMethod,
+        status: selectedMethod === "cashier" ? "pay_at_cashier" : "paid",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -192,11 +198,13 @@ export default function PaymentMethod({ order, onCancel, onPaid }) {
           className="button button-accent payment-complete-button"
           type="button"
           onClick={finishPayment}
-          disabled={!customerName.trim()}
+          disabled={!customerName.trim() || isSubmitting}
         >
-          {selectedMethod === "cashier"
-            ? "Confirm cashier payment"
-            : "I've completed payment"}{" "}
+          {isSubmitting
+            ? "Saving order..."
+            : selectedMethod === "cashier"
+              ? "Confirm cashier payment"
+              : "I've completed payment"}{" "}
           <span aria-hidden="true">→</span>
         </button>
       </section>
