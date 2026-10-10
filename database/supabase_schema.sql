@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS orders (
   CONSTRAINT orders_total_chk CHECK (total >= 0)
 );
 
-CREATE INDEX orders_customer_id_idx ON orders (customer_id);
-CREATE INDEX orders_ordered_at_idx ON orders (ordered_at);
+CREATE INDEX IF NOT EXISTS orders_customer_id_idx ON orders (customer_id);
+CREATE INDEX IF NOT EXISTS orders_ordered_at_idx ON orders (ordered_at);
 
 -- Order Items table
 CREATE TABLE IF NOT EXISTS order_items (
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   CONSTRAINT order_items_line_total_chk CHECK (line_total >= 0)
 );
 
-CREATE INDEX order_items_order_id_idx ON order_items (order_id);
+CREATE INDEX IF NOT EXISTS order_items_order_id_idx ON order_items (order_id);
 
 -- Payments table
 CREATE TABLE IF NOT EXISTS payments (
