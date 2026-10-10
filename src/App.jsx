@@ -23,14 +23,15 @@ import FeedbackModal from "./components/ReviewsModal.jsx";
 import {
   categories,
   formatPrice,
-  menuData,
   priceForOption,
 } from "./data/menuData.js";
 import { usePersistentState } from "./hooks/usePersistentState.js";
+import { supabase } from "./lib/supabase.js";
 
 const DELIVERY_FEE = 49;
 
 export default function App() {
+  const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = usePersistentState("foodmenu.cart.v1", []);
   const [favorites, setFavorites] = usePersistentState(
     "foodmenu.favorites.v1",
@@ -59,8 +60,23 @@ export default function App() {
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setIsLoading(false), 1100);
-    return () => window.clearTimeout(timer);
+    async function fetchMenu() {
+      try {
+        const { data, error } = await supabase
+          .from("menu_items")
+          .select("*")
+          .order("name");
+        
+        if (error) throw error;
+        setMenuItems(data || []);
+      } catch (err) {
+        console.error("Error fetching menu:", err);
+        showToast("Failed to load menu", "error");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchMenu();
   }, []);
 
   useLayoutEffect(() => {
@@ -139,7 +155,7 @@ export default function App() {
     () =>
       (Array.isArray(cart) ? cart : []).flatMap((line) => {
         if (!line || typeof line.id !== "string") return [];
-        const item = menuData.find((candidate) => candidate.id === line.id);
+        const item = menuItems.find((candidate) => candidate.id === line.id);
         const quantity = Math.floor(Number(line.quantity));
         if (!item || !Number.isFinite(quantity) || quantity < 1) return [];
         const option = line.option || item.options?.[0] || "Regular";
@@ -166,7 +182,7 @@ export default function App() {
 
   const visibleItems = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
-    const rows = menuData.filter((item) => {
+    const rows = menuItems.filter((item) => {
       const matchesCategory = category === "All" || item.category === category;
       const matchesFavorite = !favoritesOnly || favorites.includes(item.id);
       const matchesSearch =
@@ -246,7 +262,7 @@ export default function App() {
           onPopular={() => scrollTo("featured")}
         />
         <FeaturedSection
-          items={menuData
+          items={menuItems
             .filter((item) => item.popular && item.available)
             .slice(0, 4)}
           favorites={favorites}
